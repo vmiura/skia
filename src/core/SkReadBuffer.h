@@ -33,7 +33,7 @@ class SkInflator;
     #define DEBUG_NON_DETERMINISTIC_ASSERT
 #endif
 
-class SkReadBuffer {
+class SK_API SkReadBuffer {
 public:
     SkReadBuffer();
     SkReadBuffer(const void* data, size_t size);

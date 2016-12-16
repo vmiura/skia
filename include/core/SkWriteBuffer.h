@@ -73,7 +73,7 @@ protected:
 /**
  * Concrete implementation that serializes to a flat binary blob.
  */
-class SkBinaryWriteBuffer : public SkWriteBuffer {
+class SK_API SkBinaryWriteBuffer : public SkWriteBuffer {
 public:
     enum Flags {
         kCrossProcess_Flag = 1 << 0,
