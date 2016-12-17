@@ -38,6 +38,7 @@ protected:
     bool onAppendStages(SkRasterPipeline*, SkColorSpace*, SkArenaAlloc*,
                         const SkMatrix&, const SkPaint&, const SkMatrix*) const override;
     Context* onMakeContext(const ContextRec&, SkArenaAlloc*) const override;
+    SkPicture* onIsAPicture(SkMatrix*, TileMode[2], SkRect*) const override;
 
 private:
     SkPictureShader(sk_sp<SkPicture>, TileMode, TileMode, const SkMatrix*, const SkRect*);

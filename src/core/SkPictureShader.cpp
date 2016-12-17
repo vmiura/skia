@@ -270,6 +270,20 @@ const {
     return ctx;
 }
 
+SkPicture* SkPictureShader::onIsAPicture(SkMatrix* texM, TileMode xy[2], SkRect* tile) const {
+    if (texM) {
+        *texM = this->getLocalMatrix();
+    }
+    if (xy) {
+        xy[0] = (TileMode)fTmx;
+        xy[1] = (TileMode)fTmy;
+    }
+    if (tile) {
+        *tile = fTile;
+    }
+    return fPicture.get();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 SkPictureShader::PictureShaderContext::PictureShaderContext(

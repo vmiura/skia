@@ -263,6 +263,18 @@ public:
     }
 
     /**
+     *  Iff this shader is backed by a single SkPicture, return its ptr (the caller must ref this
+     *  if they want to keep it longer than the lifetime of the shader). If not, return nullptr.
+     */
+    SkPicture* isAPicture(SkMatrix* localMatrix, TileMode xy[2], SkRect* tile) const {
+        return this->onIsAPicture(localMatrix, xy, tile);
+    }
+
+    bool isAPicture() const {
+        return this->isAPicture(nullptr, nullptr, nullptr) != nullptr;
+    }
+
+    /**
      *  If the shader subclass can be represented as a gradient, asAGradient
      *  returns the matching GradientType enum (or kNone_GradientType if it
      *  cannot). Also, if info is not null, asAGradient populates info with
@@ -490,6 +502,10 @@ protected:
 #endif
 
     virtual SkImage* onIsAImage(SkMatrix*, TileMode[2]) const {
+        return nullptr;
+    }
+
+    virtual SkPicture* onIsAPicture(SkMatrix*, TileMode[2], SkRect*) const {
         return nullptr;
     }
 
