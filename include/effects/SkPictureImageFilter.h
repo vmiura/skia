@@ -54,6 +54,10 @@ protected:
     sk_sp<SkSpecialImage> onFilterImage(SkSpecialImage* source, const Context&,
                                         SkIPoint* offset) const override;
 
+    SkPicture* onIsPictureFilterNode(SkRect* cropRect,
+                                     SkFilterQuality* filterQuality,
+                                     bool* localSpace) const override;
+
 private:
     explicit SkPictureImageFilter(sk_sp<SkPicture> picture);
     SkPictureImageFilter(sk_sp<SkPicture> picture, const SkRect& cropRect,

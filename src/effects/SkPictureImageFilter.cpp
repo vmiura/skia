@@ -140,6 +140,18 @@ sk_sp<SkSpecialImage> SkPictureImageFilter::onFilterImage(SkSpecialImage* source
     return surf->makeImageSnapshot();
 }
 
+SkPicture* SkPictureImageFilter::onIsPictureFilterNode(SkRect* cropRect,
+                                                       SkFilterQuality* filterQuality,
+                                                       bool* localSpace) const {
+    if (cropRect)
+        *cropRect = fCropRect;
+    if (filterQuality)
+        *filterQuality = fFilterQuality;
+    if (localSpace)
+        *localSpace = (kLocalSpace_PictureResolution == fPictureResolution);
+    return fPicture.get();
+}
+
 void SkPictureImageFilter::drawPictureAtDeviceResolution(SkCanvas* canvas,
                                                          const SkIRect& deviceBounds,
                                                          const Context& ctx) const {

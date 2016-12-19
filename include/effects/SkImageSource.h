@@ -29,6 +29,8 @@ protected:
 
     sk_sp<SkSpecialImage> onFilterImage(SkSpecialImage* source, const Context&,
                                         SkIPoint* offset) const override;
+    SkImage* onIsImageSourceNode(SkRect* srcRect, SkRect* dstRect,
+                                 SkFilterQuality* filterQuality) const override;
 
 private:
     explicit SkImageSource(sk_sp<SkImage>);

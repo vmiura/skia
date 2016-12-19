@@ -36,6 +36,7 @@ protected:
     sk_sp<SkSpecialImage> onFilterImage(SkSpecialImage* source, const Context&,
                                         SkIPoint* offset) const override;
     SkIRect onFilterNodeBounds(const SkIRect& src, const SkMatrix&, MapDirection) const override;
+    bool onIsBlurFilterNode(SkScalar*, SkScalar*) const override;
 
 private:
     SkSize   fSigma;
@@ -284,6 +285,14 @@ SkIRect SkBlurImageFilterImpl::onFilterNodeBounds(const SkIRect& src, const SkMa
                                               MapDirection) const {
     SkVector sigma = map_sigma(fSigma, ctm);
     return src.makeOutset(SkScalarCeilToInt(sigma.x() * 3), SkScalarCeilToInt(sigma.y() * 3));
+}
+
+bool SkBlurImageFilterImpl::onIsBlurFilterNode(SkScalar* sigmaX, SkScalar* sigmaY) const {
+    if (sigmaX)
+        *sigmaX = fSigma.width();
+    if (sigmaY)
+        *sigmaY = fSigma.height();
+    return true;
 }
 
 #ifndef SK_IGNORE_TO_STRING

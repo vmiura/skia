@@ -131,6 +131,17 @@ sk_sp<SkSpecialImage> SkImageSource::onFilterImage(SkSpecialImage* source, const
     return surf->makeImageSnapshot();
 }
 
+SkImage* SkImageSource::onIsImageSourceNode(SkRect* srcRect, SkRect* dstRect,
+                                            SkFilterQuality* filterQuality) const {
+    if (srcRect)
+        *srcRect = fSrcRect;
+    if (dstRect)
+        *dstRect = fDstRect;
+    if (filterQuality)
+        *filterQuality = fFilterQuality;
+    return fImage.get();
+}
+
 SkRect SkImageSource::computeFastBounds(const SkRect& src) const {
     return fDstRect;
 }

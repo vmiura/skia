@@ -21,6 +21,8 @@ class GrContext;
 class GrFragmentProcessor;
 class SkColorFilter;
 struct SkIPoint;
+class SkImage;
+class SkPicture;
 class SkSpecialImage;
 class SkImageFilterCache;
 struct SkImageFilterCacheKey;
@@ -175,6 +177,20 @@ public:
     static sk_sp<SkImageFilter> MakeBlur(SkScalar sigmaX, SkScalar sigmaY,
                                          sk_sp<SkImageFilter> input,
                                          const CropRect* cropRect = nullptr);
+
+    bool isBlurFilterNode(SkScalar* sigmaX, SkScalar* sigmaY) const {
+        return this->onIsBlurFilterNode(sigmaX, sigmaY);
+    }
+
+    SkImage* isImageSourceNode(SkRect* srcRect, SkRect* dstRect,
+                               SkFilterQuality* filterQuality) const {
+        return this->onIsImageSourceNode(srcRect, dstRect, filterQuality);
+    }
+
+    SkPicture* isPictureFilterNode(SkRect* cropRect, SkFilterQuality* filterQuality,
+                                   bool* localSpace) const {
+        return this->onIsPictureFilterNode(cropRect, filterQuality, localSpace);
+    }
 
     /**
      *  Returns true (and optionally returns a ref'd filter) if this imagefilter can be completely
@@ -348,6 +364,24 @@ protected:
      */
     virtual bool onIsColorFilterNode(SkColorFilter** /*filterPtr*/) const {
         return false;
+    }
+
+    /**
+     *  Return true (and return blur parameters) if this node in the DAG is a blur filter.
+     */
+    virtual bool onIsBlurFilterNode(SkScalar*, SkScalar*) const {
+        return false;
+    }
+
+    virtual SkImage* onIsImageSourceNode(SkRect* /*srcRect*/, SkRect* /*dstRect*/,
+                                         SkFilterQuality* /*filterQuality*/) const {
+        return nullptr;
+    }
+
+    virtual SkPicture* onIsPictureFilterNode(SkRect* /*cropRect*/,
+                                             SkFilterQuality* /*filterQuality*/,
+                                             bool* /*localSpace*/) const {
+        return nullptr;
     }
 
     /**
