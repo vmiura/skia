@@ -30,9 +30,9 @@ bool SkTreatAsSprite(const SkMatrix&, const SkISize& size, const SkPaint& paint)
     factors will be negative.
     Returns true if successful. Returns false if the matrix is degenerate.
     */
-bool SkDecomposeUpper2x2(const SkMatrix& matrix,
-                         SkPoint* rotation1,
-                         SkPoint* scale,
-                         SkPoint* rotation2);
+SK_API bool SkDecomposeUpper2x2(const SkMatrix& matrix,
+                                SkPoint* rotation1,
+                                SkPoint* scale,
+                                SkPoint* rotation2);
 
 #endif
