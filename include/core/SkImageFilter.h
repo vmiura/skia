@@ -11,6 +11,7 @@
 #include "../private/SkTArray.h"
 #include "../private/SkTemplates.h"
 #include "../private/SkMutex.h"
+#include "SkColor.h"
 #include "SkColorSpace.h"
 #include "SkFilterQuality.h"
 #include "SkFlattenable.h"
@@ -180,6 +181,10 @@ public:
 
     bool isBlurFilterNode(SkScalar* sigmaX, SkScalar* sigmaY) const {
         return this->onIsBlurFilterNode(sigmaX, sigmaY);
+    }
+
+    bool isDropShadowFilterNode(SkSize* delta, SkSize* sigma, SkColor* color, uint32_t* shadowMode) const {
+        return onIsDropShadowFilterNode(delta, sigma, color, shadowMode);
     }
 
     SkImage* isImageSourceNode(SkRect* srcRect, SkRect* dstRect,
@@ -370,6 +375,10 @@ protected:
      *  Return true (and return blur parameters) if this node in the DAG is a blur filter.
      */
     virtual bool onIsBlurFilterNode(SkScalar*, SkScalar*) const {
+        return false;
+    }
+
+    virtual bool onIsDropShadowFilterNode(SkSize*, SkSize*, SkColor*, uint32_t*) const {
         return false;
     }
 

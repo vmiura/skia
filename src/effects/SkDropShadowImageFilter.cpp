@@ -112,6 +112,19 @@ sk_sp<SkSpecialImage> SkDropShadowImageFilter::onFilterImage(SkSpecialImage* sou
     return surf->makeImageSnapshot();
 }
 
+bool SkDropShadowImageFilter::onIsDropShadowFilterNode(SkSize* delta, SkSize* sigma,
+        SkColor* color, uint32_t* shadowMode) const {
+    if (delta)
+        *delta = SkSize::Make(fDx, fDy);
+    if (sigma)
+        *sigma = SkSize::Make(fSigmaX, fSigmaY);
+    if (color)
+        *color = fColor;
+    if (shadowMode)
+        *shadowMode = (unsigned)fShadowMode;
+    return true;
+}
+
 SkRect SkDropShadowImageFilter::computeFastBounds(const SkRect& src) const {
     SkRect bounds = this->getInput(0) ? this->getInput(0)->computeFastBounds(src) : src;
     SkRect shadowBounds = bounds;

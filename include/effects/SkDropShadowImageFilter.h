@@ -37,6 +37,8 @@ protected:
     sk_sp<SkSpecialImage> onFilterImage(SkSpecialImage* source, const Context&,
                                         SkIPoint* offset) const override;
     SkIRect onFilterNodeBounds(const SkIRect& src, const SkMatrix&, MapDirection) const override;
+    bool onIsDropShadowFilterNode(SkSize* delta, SkSize* sigma, SkColor* color,
+                                  uint32_t* shadowMode) const override;
 
 private:
     SkDropShadowImageFilter(SkScalar dx, SkScalar dy, SkScalar sigmaX, SkScalar sigmaY, SkColor,
