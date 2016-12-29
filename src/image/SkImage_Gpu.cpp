@@ -753,7 +753,9 @@ sk_sp<SkImage> SkImage::MakeFromDeferredTextureImageData(GrContext* context, con
     }
     const DeferredTextureImage* dti = reinterpret_cast<const DeferredTextureImage*>(data);
 
-    if (!context || context->uniqueID() != dti->fContextUniqueID) {
+    // TODO(ericrk): CDL Hacking - disable check for context equality - we are
+    // sending data over pipe beetween contexts.
+    if (!context) {
         return nullptr;
     }
     int mipLevelCount = dti->fMipMapLevelCount;
