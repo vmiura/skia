@@ -473,7 +473,7 @@ sk_sp<SkImage> SkImage::MakeTextureFromPixmap(GrContext* ctx, const SkPixmap& pi
 
 namespace {
 struct MipMapLevelData {
-    void* fPixelData;
+    size_t fPixelDataOffset;
     size_t fRowBytes;
 };
 
@@ -486,7 +486,7 @@ struct DeferredTextureImage {
     int                           fHeight;
     SkColorType                   fColorType;
     SkAlphaType                   fAlphaType;
-    void*                         fColorSpace;
+    size_t                        fColorSpaceOffset;
     size_t                        fColorSpaceSize;
     int                           fMipMapLevelCount;
     // The fMipMapLevelData array may contain more than 1 element.
@@ -686,18 +686,18 @@ size_t SkImage::getDeferredTextureImageData(const GrContextThreadSafeProxy& prox
     SkAlphaType alphaType = info.alphaType();
     FILL_MEMBER(dtiBufferFiller, fAlphaType, &alphaType);
     FILL_MEMBER(dtiBufferFiller, fMipMapLevelCount, &mipMapLevelCount);
-    memcpy(bufferAsCharPtr + offsetof(DeferredTextureImage, fMipMapLevelData[0].fPixelData),
-           &pixels, sizeof(pixels));
+    memcpy(bufferAsCharPtr + offsetof(DeferredTextureImage, fMipMapLevelData[0].fPixelDataOffset),
+           &pixelOffset, sizeof(pixelOffset));
     memcpy(bufferAsCharPtr + offsetof(DeferredTextureImage, fMipMapLevelData[0].fRowBytes),
            &rowBytes, sizeof(rowBytes));
     if (colorSpaceSize) {
         void* colorSpace = bufferAsCharPtr + colorSpaceOffset;
-        FILL_MEMBER(dtiBufferFiller, fColorSpace, &colorSpace);
+        FILL_MEMBER(dtiBufferFiller, fColorSpaceOffset, &colorSpaceOffset);
         FILL_MEMBER(dtiBufferFiller, fColorSpaceSize, &colorSpaceSize);
         info.colorSpace()->writeToMemory(bufferAsCharPtr + colorSpaceOffset);
     } else {
-        memset(bufferAsCharPtr + offsetof(DeferredTextureImage, fColorSpace),
-               0, sizeof(DeferredTextureImage::fColorSpace));
+        memset(bufferAsCharPtr + offsetof(DeferredTextureImage, fColorSpaceOffset),
+               0, sizeof(DeferredTextureImage::fColorSpaceOffset));
         memset(bufferAsCharPtr + offsetof(DeferredTextureImage, fColorSpaceSize),
                0, sizeof(DeferredTextureImage::fColorSpaceSize));
     }
@@ -732,9 +732,10 @@ size_t SkImage::getDeferredTextureImageData(const GrContextThreadSafeProxy& prox
 
             memcpy(mipLevelPtr, mipLevel.fPixmap.addr(), mipLevel.fPixmap.getSafeSize());
 
+            size_t mipPixelsOffset = mipLevelPtr - bufferAsCharPtr;
             memcpy(bufferAsCharPtr + offsetof(DeferredTextureImage, fMipMapLevelData) +
                    sizeof(MipMapLevelData) * (generatedMipLevelIndex + 1) +
-                   offsetof(MipMapLevelData, fPixelData), &mipLevelPtr, sizeof(void*));
+                   offsetof(MipMapLevelData, fPixelDataOffset), &mipPixelsOffset, sizeof(mipPixelsOffset));
             size_t rowBytes = mipLevel.fPixmap.rowBytes();
             memcpy(bufferAsCharPtr + offsetof(DeferredTextureImage, fMipMapLevelData) +
                    sizeof(MipMapLevelData) * (generatedMipLevelIndex + 1) +
@@ -752,6 +753,7 @@ sk_sp<SkImage> SkImage::MakeFromDeferredTextureImageData(GrContext* context, con
         return nullptr;
     }
     const DeferredTextureImage* dti = reinterpret_cast<const DeferredTextureImage*>(data);
+    const char* bufferAsCharPtr = reinterpret_cast<const char*>(dti);
 
     // TODO(ericrk): CDL Hacking - disable check for context equality - we are
     // sending data over pipe beetween contexts.
@@ -762,18 +764,19 @@ sk_sp<SkImage> SkImage::MakeFromDeferredTextureImageData(GrContext* context, con
     SkASSERT(mipLevelCount >= 1);
     sk_sp<SkColorSpace> colorSpace;
     if (dti->fColorSpaceSize) {
-        colorSpace = SkColorSpace::Deserialize(dti->fColorSpace, dti->fColorSpaceSize);
+        colorSpace = SkColorSpace::Deserialize(bufferAsCharPtr + dti->fColorSpaceOffset, dti->fColorSpaceSize);
     }
     SkImageInfo info = SkImageInfo::Make(dti->fWidth, dti->fHeight,
                                          dti->fColorType, dti->fAlphaType, colorSpace);
     if (mipLevelCount == 1) {
         SkPixmap pixmap;
-        pixmap.reset(info, dti->fMipMapLevelData[0].fPixelData, dti->fMipMapLevelData[0].fRowBytes);
+        pixmap.reset(info, bufferAsCharPtr + dti->fMipMapLevelData[0].fPixelDataOffset,
+                     dti->fMipMapLevelData[0].fRowBytes);
         return SkImage::MakeTextureFromPixmap(context, pixmap, budgeted);
     } else {
         std::unique_ptr<GrMipLevel[]> texels(new GrMipLevel[mipLevelCount]);
         for (int i = 0; i < mipLevelCount; i++) {
-            texels[i].fPixels = dti->fMipMapLevelData[i].fPixelData;
+            texels[i].fPixels = bufferAsCharPtr + dti->fMipMapLevelData[i].fPixelDataOffset;
             texels[i].fRowBytes = dti->fMipMapLevelData[i].fRowBytes;
         }
 
